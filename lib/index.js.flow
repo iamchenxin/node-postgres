@@ -1,0 +1,99 @@
+/* @flow
+ *
+**/
+const EventEmitter = require('events').EventEmitter;
+//const Client = require('./client');
+
+type ResultSet = {
+  rows: Array<any>,
+};
+type ResultBuilder = {
+  command: string,
+  rowCount: number,
+  oid: number,
+  rows: Array<any>,
+  addRow: (row: any) => void,
+};
+
+//type ClientConstructor = new (connection: string | Config) => Client;
+type QueryCallback = (err: Error, result: ResultSet) => void;
+type ClientConnectCallback = (err: Error, client: Client) => void;
+type ConnectCallback = (err: Error, client: Client, done: DoneCallback) => void;
+type DoneCallback = () => void;
+
+type Options = {
+  log: Function,
+  Client: any,
+  Promise: any,
+  max: number,
+  min: number,
+  create: Function,
+  destroy: Function,
+  onCreate: Function,
+
+  // client
+  // database host. defaults to localhost
+  host?: string,
+  //database user's name
+  user?: string,
+  //name of database to connect
+  database?: string,
+  //database user's password
+  password?: string,
+  // a Postgres connection string to be used instead of setting individual connection items
+  // NOTE:  Setting this value will cause it to override any other value (such as database or user) defined
+  // in the defaults object.
+  connectionString?: string,
+  //database port
+  port?: number,
+  //number of rows to return at a time from a prepared statement's
+  //portal. 0 will return all rows at once
+  rows?: number,
+  // binary result mode
+  binary?: boolean,
+  //Connection pool options - see https://github.com/coopernurse/node-pool
+  //number of connections to use in connection pool
+  //0 will disable connection pooling
+  poolSize?: number,
+  //max milliseconds a client can go unused before it is removed
+  //from the pool and destroyed
+  poolIdleTimeout?: number,
+  //frequency to check for idle clients within the client pool
+  reapIntervalMillis?: number,
+  //if true the most recently released resources will be the first to be allocated
+  returnToHead?: boolean,
+  //pool log function / boolean
+  poolLog?: boolean,
+  client_encoding?: string,
+  ssl?: boolean,
+  application_name?: string,
+  fallback_application_name?: string,
+  parseInputDatesAsUTC?: boolean,
+};
+
+type C_CallBack = (_: null, client: Client) => void;
+declare class Client {
+  connect: (callback: C_CallBack) => void;
+  //cancel: (client, query) => void;
+  release: (state?: boolean) => void;
+  query: (config:any, values:any, callback:any) => Promise<any>;
+}
+
+//type CP_CallBack =
+declare class ClassPool extends EventEmitter {
+  constructor(options: Options, Client: any): void;
+
+  connect(callBack?: (err:any, result:any,
+    cb: (err:any) => any )=>void ): Promise<Client>;
+}
+
+declare class PG extends EventEmitter {
+  Pool: Class<ClassPool>;
+  constructor(options: Options, Client: any): void;
+  end: () => void;
+
+}
+
+const pg:PG = new PG(Client);
+const hello:string = 'aaaaa';
+module.exports = pg;
