@@ -125,11 +125,20 @@ declare class PG extends EventEmitter {
   Pool: Class<Pool>;
   Connection: any; //Connection is used internally by the Client.
   constructor(client: Client): void;
+  native: { // native binding, have the same capability like PG
+    types: Types;
+    Client: Class<Client>;
+    Pool: Class<Pool>;
+    Connection: any;
+  };
 // The end(),connect(),cancel() in PG is abandoned ?
 }
 
+// module export, keep same structure with index.js
 declare var pg:PG ;
 module.exports = pg;
+
+// type output
 type QueryType = Query;
 export type {
   ResultSet,
