@@ -5,7 +5,6 @@ const EventEmitter = require('events').EventEmitter;
 const Pool = require('pg-pool');
 
 type ClientConfig = {
-  // client --------------------
   //database user's name
   user: string,
   //name of database to connect
@@ -44,13 +43,11 @@ type QueryConfig = {
   text: string,
   values?: any[],
 };
+
 // query.js this.callback(null, this._result); & this.callback(err);
 type QueryCallback = (err: Error|null, result: ResultSet|void) => void;
 // client.js callback(null, self); &  callback(error);
 type ClientConnectCallback = (err: Error|null, client: Client|void) => void;
-//
-//type ConnectCallback = (err: Error, client: Client, done: DoneCallback) => void;
-//type DoneCallback = () => void;
 
 /*
  * lib/query.js
@@ -81,12 +78,13 @@ declare class Query extends Promise<ResultSet> {
 
 /*
  * lib/client.js
+ * Note: if not extends from EventEmitter.
+ * on() can return this. Flow's EventEmitter force return a EventEmitter in on()
 */
 declare class Client {
   constructor(config?: string | ClientConfig): void;
   connect(callback?: ClientConnectCallback):void;
   end(): void;
-//  release(ifErr?: boolean): void;
 
   query:
   ( (query: QueryConfig|string, callback?: QueryCallback) => Query ) &
@@ -127,8 +125,7 @@ declare class PG extends EventEmitter {
   Pool: Class<Pool>;
   Connection: any; //Connection is used internally by the Client.
   constructor(client: Client): void;
-  end: () => void;
-
+// The end(),connect(),cancel() in PG is abandoned ?
 }
 
 declare var pg:PG ;
@@ -140,7 +137,5 @@ export type {
   QueryConfig,
   QueryCallback,
   ClientConnectCallback,
-//  ConnectCallback,
-//  DoneCallback,
   QueryType,
 };
