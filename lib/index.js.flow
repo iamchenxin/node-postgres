@@ -44,11 +44,13 @@ type QueryConfig = {
   text: string,
   values?: any[],
 };
-
-type QueryCallback = (err: Error, result: ResultSet) => void;
-type ClientConnectCallback = (err: Error, client: Client) => void;
-type ConnectCallback = (err: Error, client: Client, done: DoneCallback) => void;
-type DoneCallback = () => void;
+// query.js this.callback(null, this._result); & this.callback(err);
+type QueryCallback = (err: Error|null, result: ResultSet|void) => void;
+// client.js callback(null, self); &  callback(error);
+type ClientConnectCallback = (err: Error|null, client: Client|void) => void;
+//
+//type ConnectCallback = (err: Error, client: Client, done: DoneCallback) => void;
+//type DoneCallback = () => void;
 
 /*
  * lib/query.js
@@ -82,7 +84,7 @@ declare class Query extends Promise<ResultSet> {
 */
 declare class Client {
   constructor(config?: string | ClientConfig): void;
-  connect(callback: ClientConnectCallback):void;
+  connect(callback?: ClientConnectCallback):void;
   end(): void;
 //  release(ifErr?: boolean): void;
 
@@ -131,13 +133,14 @@ declare class PG extends EventEmitter {
 
 declare var pg:PG ;
 module.exports = pg;
-
+type QueryType = Query;
 export type {
   ResultSet,
   ResultBuilder,
   QueryConfig,
   QueryCallback,
   ClientConnectCallback,
-  ConnectCallback,
-  DoneCallback
+//  ConnectCallback,
+//  DoneCallback,
+  QueryType,
 };
