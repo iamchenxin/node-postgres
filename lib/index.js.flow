@@ -4,6 +4,28 @@
 const EventEmitter = require('events').EventEmitter;
 const Pool = require('pg-pool');
 
+// error
+type PG_ERROR = {
+  name: string,
+  length: number,
+  severity: string,
+  code: string,
+  detail: string|void,
+  hint: string|void,
+  position: string|void,
+  internalPosition: string|void,
+  internalQuery: string|void,
+  where: string|void,
+  schema: string|void,
+  table: string|void,
+  column: string|void,
+  dataType: string|void,
+  constraint: string|void,
+  file: string|void,
+  line: string|void,
+  routine: string|void
+};
+
 type ClientConfig = {
   //database user's name
   user: string,
@@ -45,9 +67,9 @@ type QueryConfig = {
 };
 
 // query.js this.callback(null, this._result); & this.callback(err);
-type QueryCallback = (err: Error|null, result: ResultSet|void) => void;
+type QueryCallback = (err: PG_ERROR|null, result: ResultSet|void) => void;
 // client.js callback(null, self); &  callback(error);
-type ClientConnectCallback = (err: Error|null, client: Client|void) => void;
+type ClientConnectCallback = (err: PG_ERROR|null, client: Client|void) => void;
 
 /*
  * lib/query.js
@@ -65,14 +87,16 @@ type ClientConnectCallback = (err: Error|null, client: Client|void) => void;
 */
 declare class Query extends Promise<ResultSet> {
   then<U>( onFulfill?: (value: ResultSet) => Promise<U> | U,
-    onReject?: (error: any) => Promise<U> | U
+    onReject?: (error: PG_ERROR) => Promise<U> | U
   ): Promise<U>;
-  catch<U>( onReject?: (error: any) => ?Promise<U> | U ): Promise<U>;
+  // Because then and catch return a Promise,
+  // .then.catch will lose catch's type information PG_ERROR.
+  catch<U>( onReject?: (error: PG_ERROR) => ?Promise<U> | U ): Promise<U>;
 
   on :
   ((event: 'row', listener: (row: Row, result: ResultBuilder) => void) => EventEmitter )&
   ((event: 'end', listener: (result: ResultBuilder) => void) => EventEmitter )&
-  ((event: 'error', listener: (err: Error) => void) => EventEmitter );
+  ((event: 'error', listener: (err: PG_ERROR) => void) => EventEmitter );
 //  ((event: string, listener: Function) => EventEmitter );
 }
 
@@ -92,7 +116,7 @@ declare class Client {
 
   on:
   ((event: 'drain', listener: () => void) => this )&
-  ((event: 'error', listener: (err: Error) => void) => this )&
+  ((event: 'error', listener: (err: PG_ERROR) => void) => this )&
   ((event: 'notification', listener: (message: any) => void) => this )&
   ((event: 'notice', listener: (message: any) => void) => this )&
   ((event: 'end', listener: () => void) => this );
@@ -147,4 +171,5 @@ export type {
   QueryCallback,
   ClientConnectCallback,
   QueryType,
+  PG_ERROR,
 };
